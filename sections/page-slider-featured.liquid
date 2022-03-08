@@ -1,0 +1,297 @@
+{% stylesheet %}
+<!-- font-family: 'Open Sans', sans-serif;
+font-family: 'Playfair Display', serif;
+ -->
+
+#slickSliderFeatured{
+	padding-top:128px;
+}
+
+#slickSliderFeatured h2{
+	font-family: 'Playfair Display', serif;
+	font-weight: 600;
+	font-size: 36px!important;
+	letter-spacing: -0.43px;
+	line-height: 36px;
+	color: #111111;
+    margin: 0;
+	padding: 0 20px 0 20px;
+}
+
+#slickSliderFeatured .slider_item{
+	padding: 0 20px 0 20px;
+}
+
+#slickSliderFeatured .slider_item a{
+	text-decoration: none;
+}
+
+#slickSliderFeatured  .slick-arrow{
+	background: #FFFFFF;
+    -webkit-box-shadow: 2px 1px 4px 2px #0000001F; 
+    box-shadow: 2px 1px 4px 2px #0000001F;
+	border-radius: 25px;
+	padding: 20px;
+	top: 30%;
+    z-index: 1;
+}
+
+#slickSliderFeatured .slick-prev{
+	left: 10px;
+}
+
+#slickSliderFeatured .slick-next{
+	right: 10px;
+}
+
+#slickSliderFeatured .slick-prev:before, #slickSliderFeatured .slick-next:before {
+	left: 10px;
+    top: 10px;
+    position: absolute;
+    color: #838383;
+}
+
+#slickSliderFeatured .slider_img_wrap{
+    max-width: 330px;
+    height: 430px;
+	background-color: #fafafa;
+	margin: 24px 0 24px 0;
+}
+
+#slickSliderFeatured .slider_img_wrap img{
+	width:100%; 
+	height:100%;
+	object-fit: cover;
+}
+
+#slickSliderFeatured .slider_item h3{
+	font-family: 'Playfair Display', serif;
+	font-weight: 400;
+	color: #111111;
+	font-size: 24px;
+	line-height: 24px;
+	letter-spacing: -0.29px;
+}
+
+#slickSliderFeatured .product-desc{
+	font-family: 'Open Sans', sans-serif;
+	font-weight: 400;
+	color: #4D4D4D;
+	font-size: 12px;
+	line-height: 18px;
+	letter-spacing: 0.29px;
+	margin: 12px 0 12px 0;
+}
+
+#slickSliderFeatured .price-item{
+	font-family: 'Open Sans', sans-serif;
+	font-size: 12px;
+	line-height: 18px;
+	letter-spacing: 0.29px;
+	display: inline-block;
+	margin-right: 5px;
+	margin-bottom: 24px;
+}
+
+#slickSliderFeatured .price__regular .price-item{
+	font-weight: 600;
+	color: #4D4D4D;
+}
+
+#slickSliderFeatured .price__sale .price-item--regular{
+	font-weight: 400;
+	color: #888888;
+}
+
+#slickSliderFeatured .price__sale .price-item--sale{
+	font-weight: 600;
+	color: #4D4D4D;
+}
+
+#slickSliderFeatured .price--on-sale .price__sale{
+	display: flex;
+    flex-direction: row-reverse;
+}
+
+#slickSliderFeatured .price--on-sale .price-item{
+	display: flex;
+}
+
+{% endstylesheet %}
+
+
+{% javascript %}
+  <!-- Slick Slider -->
+  $('.slider_wrap').slick({
+    infinite: true,
+	autoplay: false,
+    speed: 500,
+	arrows: true,
+    slidesToShow: 4,
+    slidesToScroll: 1
+  });
+  <!-- Slick Slider End	 -->
+{% endjavascript %}
+
+
+{%- liquid
+  assign products_to_display = section.settings.collection.all_products_count
+
+  if section.settings.collection.all_products_count > section.settings.products_to_show
+    assign products_to_display = section.settings.products_to_show
+    assign more_in_collection = true
+  endif
+-%}
+
+
+{% if section.blocks.size > 0 %}
+<section id="slickSliderFeatured">
+  <div class="container">
+    <div class="row">
+
+      <div class="col-12">
+          <h2>{{ section.settings.slider_header_title }}</h2>
+      </div>
+
+      <div class="slider_wrap">
+
+      {% for block in section.blocks %}
+           {%- for product in section.settings.collection.products limit: section.settings.products_to_show -%}
+              <div class="col-3">
+                <div class="slider_item">
+                   <a href="{{ product.url}}">
+                    <div class="slider_img_wrap">
+                      <img src="{{ product.featured_image | img_url: 'original' }}" alt="" class="slider_img">
+                    </div>
+
+                    <div class="content_wrap">
+                      <div class="slider_content">
+                        <h3 class="slider_title"> {{ product.title }} </h3>
+
+                        <p class="product-desc">{{ product.description }} </p>
+
+                        <!-- Product Price -->
+                        <div class="no-js-hidden" id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
+                            {%- render 'price', product: product, use_variant: true, show_badges: false, price_class: 'price--large' -%}
+                         </div>
+                         {%- if shop.taxes_included or shop.shipping_policy.body != blank -%}
+                            <div class="product__tax caption rte">
+                              {%- if shop.taxes_included -%}
+                                {{ 'products.product.include_taxes' | t }}
+                              {%- endif -%}
+                              {%- if shop.shipping_policy.body != blank -%}
+                                {{ 'products.product.shipping_policy_html' | t: link: shop.shipping_policy.url }}
+                              {%- endif -%}
+                            </div>
+                         {%- endif -%}
+                         {%- if product != blank -%}
+                            <div {{ block.shopify_attributes }}>
+                              {%- form 'product', product -%}
+                                <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                                {{ form | payment_terms }}
+                              {%- endform -%}
+                            </div>
+                         {%- endif -%}
+
+
+
+              <product-form class="product-form">
+                  <div class="product-form__error-message-wrapper" role="alert" hidden>
+                    <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon-error" viewBox="0 0 13 13">
+                      <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2"/>
+                      <circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7"/>
+                      <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white"/>
+                      <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7">
+                    </svg>
+                    <span class="product-form__error-message"></span>
+                  </div>
+
+                  {%- form action:'/cart/add', method:'post', class:'product-form', id:'add-to-cart' -%}
+                    <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}" disabled>
+                    <div class="product-form__buttons">
+
+                      <button
+                        type="submit"
+                        name="add"
+                        class="product-form__submit button button--full-width {% if block.settings.show_dynamic_checkout and product.selling_plan_groups == empty %}button--secondary{% else %}button--primary{% endif %}"
+                      {% if product.selected_or_first_available_variant.available == false %}disabled{% endif %}
+                      >
+                          <span>
+                            {%- if product.selected_or_first_available_variant.available -%}
+                              {{ 'products.product.add_to_cart' | t }}
+                            {%- else -%}
+                              {{ 'products.product.sold_out' | t }}
+                            {%- endif -%}
+                          </span>
+                          <div class="loading-overlay__spinner hidden">
+                            <svg aria-hidden="true" focusable="false" role="presentation" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                              <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                            </svg>
+                          </div>
+                      </button>
+
+                      {%- if block.settings.show_dynamic_checkout -%}
+                        {{ form | payment_button }}
+                      {%- endif -%}
+                    </div>
+                  {%- endform -%}
+                </product-form>
+
+
+
+
+                      </div>
+                    </div>
+                   </a>
+                </div>
+              </div>
+          {% endfor %}
+      {% endfor %}
+
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+{% schema %}
+{
+"presets": [
+    {
+      "name": "Slick Slider Featured"
+    }
+],
+"name": "Slick Slider Featured",
+"max_blocks": 1,
+"settings": [
+  {
+    "type":"header",
+    "content":"Featured slider options"
+  },
+  {
+    "type": "text",
+    "id": "slider_header_title",
+    "label": "Header Title"
+  },
+  {
+    "type": "collection",
+    "id": "collection",
+    "label": "t:sections.featured-collection.settings.collection.label"
+  }
+],
+"blocks": [
+  {
+  "type": "slide",
+  "name": "Slide",
+  "settings": [
+        {
+          "type": "text",
+          "id": "slide_label",
+          "label": "Slide label"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
